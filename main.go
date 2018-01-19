@@ -29,17 +29,21 @@ func main() {
 			panic(err)
 		}
 		proxy := httputil.NewSingleHostReverseProxy(vhost)
-		http.HandleFunc(path+"/", handler(proxy))
+		http.Handle(path+"/", &ProxyHandler{proxy})
 	}
 
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe("", nil)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func handler(p *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		p.ServeHTTP(w, r)
-	}
+type ProxyHandler struct {
+	p *httputil.ReverseProxy
+}
+
+func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// add customization here (if desired)
+
+	ph.p.ServeHTTP(w, r)
 }
